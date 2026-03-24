@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ViajaPlán - Planifica tus Viajes</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Sidebar -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <h1 class="logo">ViajaPlán</h1>
+                <p class="logo-subtitle">Tu planificador de viajes</p>
+            </div>
+            <button id="btn-new-trip" class="btn btn-primary btn-block">
+                + Nuevo Viaje
+            </button>
+            <nav id="trip-list" class="trip-list">
+                <!-- Trip items rendered here -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main id="main-content">
+            <!-- Welcome Screen -->
+            <section id="welcome-screen" class="screen active">
+                <div class="welcome-container">
+                    <div class="welcome-icon">&#9992;</div>
+                    <h2>¡Bienvenido a ViajaPlán!</h2>
+                    <p>Organiza tus próximas aventuras. Crea un nuevo viaje para comenzar a planificar destinos, actividades y presupuesto.</p>
+                    <button class="btn btn-primary btn-lg" onclick="openNewTripModal()">
+                        Crear mi primer viaje
+                    </button>
+                </div>
+            </section>
+
+            <!-- Trip Detail Screen -->
+            <section id="trip-detail-screen" class="screen">
+                <header class="trip-header">
+                    <div class="trip-header-info">
+                        <h2 id="trip-title"></h2>
+                        <p id="trip-dates" class="trip-dates"></p>
+                    </div>
+                    <div class="trip-header-actions">
+                        <button class="btn btn-outline btn-sm" onclick="editCurrentTrip()">Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteCurrentTrip()">Eliminar</button>
+                    </div>
+                </header>
+
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" data-tab="itinerary">Itinerario</button>
+                    <button class="tab" data-tab="budget">Presupuesto</button>
+                    <button class="tab" data-tab="notes">Notas</button>
+                    <button class="tab" data-tab="packing">Equipaje</button>
+                </div>
+
+                <!-- Itinerary Tab -->
+                <div id="tab-itinerary" class="tab-content active">
+                    <div class="tab-header">
+                        <h3>Itinerario</h3>
+                        <button class="btn btn-primary btn-sm" onclick="openActivityModal()">+ Actividad</button>
+                    </div>
+                    <div id="itinerary-timeline" class="timeline">
+                        <!-- Activities rendered here -->
+                    </div>
+                    <div id="itinerary-empty" class="empty-state">
+                        <p>No hay actividades aún. Agrega tu primera actividad para empezar a planificar.</p>
+                    </div>
+                </div>
+
+                <!-- Budget Tab -->
+                <div id="tab-budget" class="tab-content">
+                    <div class="tab-header">
+                        <h3>Presupuesto</h3>
+                        <button class="btn btn-primary btn-sm" onclick="openExpenseModal()">+ Gasto</button>
+                    </div>
+                    <div class="budget-summary">
+                        <div class="budget-card">
+                            <span class="budget-label">Presupuesto</span>
+                            <span id="budget-total" class="budget-amount">$0</span>
+                        </div>
+                        <div class="budget-card">
+                            <span class="budget-label">Gastado</span>
+                            <span id="budget-spent" class="budget-amount spent">$0</span>
+                        </div>
+                        <div class="budget-card">
+                            <span class="budget-label">Disponible</span>
+                            <span id="budget-remaining" class="budget-amount remaining">$0</span>
+                        </div>
+                    </div>
+                    <div class="budget-bar-container">
+                        <div id="budget-bar" class="budget-bar"></div>
+                    </div>
+                    <div id="expenses-list" class="expenses-list">
+                        <!-- Expenses rendered here -->
+                    </div>
+                    <div id="expenses-empty" class="empty-state">
+                        <p>No hay gastos registrados.</p>
+                    </div>
+                </div>
+
+                <!-- Notes Tab -->
+                <div id="tab-notes" class="tab-content">
+                    <div class="tab-header">
+                        <h3>Notas</h3>
+                    </div>
+                    <textarea id="trip-notes" class="notes-textarea" placeholder="Escribe tus notas aquí... (tips, direcciones, contactos, etc.)"></textarea>
+                </div>
+
+                <!-- Packing Tab -->
+                <div id="tab-packing" class="tab-content">
+                    <div class="tab-header">
+                        <h3>Lista de Equipaje</h3>
+                    </div>
+                    <div class="packing-input-row">
+                        <input type="text" id="packing-item-input" placeholder="Agregar artículo..." onkeydown="if(event.key==='Enter') addPackingItem()">
+                        <button class="btn btn-primary btn-sm" onclick="addPackingItem()">Agregar</button>
+                    </div>
+                    <div id="packing-list" class="packing-list">
+                        <!-- Packing items rendered here -->
+                    </div>
+                    <div id="packing-empty" class="empty-state">
+                        <p>Tu lista de equipaje está vacía.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal: New/Edit Trip -->
+    <div id="modal-trip" class="modal">
+        <div class="modal-overlay" onclick="closeModal('modal-trip')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-trip-title">Nuevo Viaje</h3>
+                <button class="modal-close" onclick="closeModal('modal-trip')">&times;</button>
+            </div>
+            <form id="form-trip" onsubmit="saveTrip(event)">
+                <div class="form-group">
+                    <label for="trip-name">Nombre del viaje</label>
+                    <input type="text" id="trip-name" required placeholder="Ej: Vacaciones en la playa">
+                </div>
+                <div class="form-group">
+                    <label for="trip-destination">Destino</label>
+                    <input type="text" id="trip-destination" required placeholder="Ej: Cancún, México">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="trip-start">Fecha inicio</label>
+                        <input type="date" id="trip-start" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="trip-end">Fecha fin</label>
+                        <input type="date" id="trip-end" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="trip-budget">Presupuesto ($)</label>
+                    <input type="number" id="trip-budget" min="0" step="0.01" placeholder="Ej: 5000">
+                </div>
+                <input type="hidden" id="trip-edit-id">
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-trip')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: New Activity -->
+    <div id="modal-activity" class="modal">
+        <div class="modal-overlay" onclick="closeModal('modal-activity')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nueva Actividad</h3>
+                <button class="modal-close" onclick="closeModal('modal-activity')">&times;</button>
+            </div>
+            <form id="form-activity" onsubmit="saveActivity(event)">
+                <div class="form-group">
+                    <label for="activity-title">Título</label>
+                    <input type="text" id="activity-title" required placeholder="Ej: Visitar las ruinas">
+                </div>
+                <div class="form-group">
+                    <label for="activity-date">Fecha</label>
+                    <input type="date" id="activity-date" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="activity-time">Hora</label>
+                        <input type="time" id="activity-time">
+                    </div>
+                    <div class="form-group">
+                        <label for="activity-category">Categoría</label>
+                        <select id="activity-category">
+                            <option value="sightseeing">Turismo</option>
+                            <option value="food">Comida</option>
+                            <option value="transport">Transporte</option>
+                            <option value="hotel">Hospedaje</option>
+                            <option value="adventure">Aventura</option>
+                            <option value="shopping">Compras</option>
+                            <option value="other">Otro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="activity-location">Ubicación</label>
+                    <input type="text" id="activity-location" placeholder="Ej: Centro histórico">
+                </div>
+                <div class="form-group">
+                    <label for="activity-notes">Notas</label>
+                    <textarea id="activity-notes" rows="2" placeholder="Detalles adicionales..."></textarea>
+                </div>
+                <input type="hidden" id="activity-edit-id">
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-activity')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: New Expense -->
+    <div id="modal-expense" class="modal">
+        <div class="modal-overlay" onclick="closeModal('modal-expense')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nuevo Gasto</h3>
+                <button class="modal-close" onclick="closeModal('modal-expense')">&times;</button>
+            </div>
+            <form id="form-expense" onsubmit="saveExpense(event)">
+                <div class="form-group">
+                    <label for="expense-description">Descripción</label>
+                    <input type="text" id="expense-description" required placeholder="Ej: Hotel 3 noches">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="expense-amount">Monto ($)</label>
+                        <input type="number" id="expense-amount" required min="0" step="0.01" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="expense-category">Categoría</label>
+                        <select id="expense-category">
+                            <option value="accommodation">Hospedaje</option>
+                            <option value="transport">Transporte</option>
+                            <option value="food">Comida</option>
+                            <option value="activities">Actividades</option>
+                            <option value="shopping">Compras</option>
+                            <option value="other">Otro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="expense-date">Fecha</label>
+                    <input type="date" id="expense-date">
+                </div>
+                <input type="hidden" id="expense-edit-id">
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-expense')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
