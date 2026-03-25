@@ -1,0 +1,9 @@
+{
+  "name": "vijaplan",
+  "version": "1.0.0",
+  "description": "ViajaPlán - Planificador de viajes",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx live-server --port=3000"
+  }
+}
