@@ -53,13 +53,18 @@ body {
 #app {
     max-width: 430px;
     margin: 0 auto;
-    height: 100vh;
+    height: 100dvh;
+    height: 100vh; /* fallback */
     display: flex;
     flex-direction: column;
     background: var(--cream-light);
     position: relative;
     overflow: hidden;
     box-shadow: 0 0 40px rgba(0,0,0,0.15);
+}
+
+@supports (height: 100dvh) {
+    #app { height: 100dvh; }
 }
 
 /* ===== Screens ===== */
@@ -880,12 +885,15 @@ body {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    height: var(--nav-height);
+    min-height: var(--nav-height);
     background: var(--white);
     border-top: 1px solid var(--gray-200);
-    padding: 0 8px;
-    padding-bottom: env(safe-area-inset-bottom, 0);
+    padding: 4px 8px;
+    padding-bottom: calc(env(safe-area-inset-bottom, 8px) + 8px);
     flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 50;
 }
 
 .nav-item {
