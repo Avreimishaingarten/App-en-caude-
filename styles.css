@@ -1023,6 +1023,131 @@ body {
     position: relative;
 }
 
+/* ===== Zmanim (Halachic Times) ===== */
+.zmanim-card {
+    margin: 0 16px 16px;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+    border-radius: var(--radius);
+    padding: 16px;
+    color: var(--white);
+    box-shadow: var(--shadow-md);
+}
+
+.zmanim-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.zmanim-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.zmanim-header-left svg {
+    color: var(--gold);
+}
+
+.zmanim-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.zmanim-date {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.5);
+    font-weight: 500;
+}
+
+.zmanim-location {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 14px;
+}
+
+.zmanim-location svg {
+    flex-shrink: 0;
+}
+
+.zmanim-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+
+.zmanim-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.zmanim-item:nth-child(odd) {
+    border-right: 1px solid rgba(255,255,255,0.08);
+}
+
+.zmanim-item.highlight {
+    background: rgba(212, 168, 75, 0.15);
+    border-radius: 6px;
+}
+
+.zmanim-label {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.6);
+}
+
+.zmanim-time {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.zmanim-item.highlight .zmanim-time {
+    color: var(--gold);
+}
+
+.zmanim-loading {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 16px;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.8rem;
+}
+
+.zmanim-toggle {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 8px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 6px;
+    color: var(--gold);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.zmanim-toggle:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+.zmanim-extra {
+    display: none;
+}
+
+.zmanim-extra.show {
+    display: contents;
+}
+
 /* ===== Scrollbar ===== */
 .screen::-webkit-scrollbar {
     width: 0;

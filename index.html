@@ -24,6 +24,25 @@
                 <p class="greeting-sub">Explora las historias de nuestra comunidad y comparte tu propia herencia hoy.</p>
             </div>
 
+            <!-- Zmanim Section -->
+            <div class="zmanim-card" id="zmanim-card">
+                <div class="zmanim-header">
+                    <div class="zmanim-header-left">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                        <h3 class="zmanim-title serif">Horarios Halájicos</h3>
+                    </div>
+                    <span class="zmanim-date" id="zmanim-date"></span>
+                </div>
+                <div class="zmanim-location" id="zmanim-location">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span id="zmanim-city">Detectando ubicación...</span>
+                </div>
+                <div class="zmanim-grid" id="zmanim-grid">
+                    <div class="zmanim-loading">Cargando horarios...</div>
+                </div>
+                <button class="zmanim-toggle" id="zmanim-toggle" onclick="toggleZmanim()">Ver todos los horarios</button>
+            </div>
+
             <div class="filter-tags">
                 <button class="tag active">Todos</button>
                 <button class="tag">Gastronomía</button>

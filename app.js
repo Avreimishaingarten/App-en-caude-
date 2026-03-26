@@ -280,6 +280,114 @@ function timeAgo(dateStr) {
     return `hace ${days}d`;
 }
 
+// ===== Zmanim (Halachic Times) =====
+let zmanimExpanded = false;
+
+const ZMANIM_LABELS = {
+    alotHaShachar: 'Alot HaShajar',
+    misheyakir: 'Misheyakir',
+    sunrise: 'Netz HaJamá',
+    sofZmanShma: 'Sof Zmán Shemá',
+    sofZmanTfilla: 'Sof Zmán Tefilá',
+    chatzot: 'Jatzot',
+    minchaGedola: 'Minjá Guedolá',
+    minchaKetana: 'Minjá Ketaná',
+    plagHaMincha: 'Plag HaMinjá',
+    sunset: 'Shkiá',
+    tzeit7083deg: 'Tzeit HaKojabim',
+    tzeit85deg: 'Tzeit (RT)',
+};
+
+const ZMANIM_MAIN = ['sunrise', 'sofZmanShma', 'sofZmanTfilla', 'chatzot', 'sunset', 'tzeit7083deg'];
+const ZMANIM_EXTRA = ['alotHaShachar', 'misheyakir', 'minchaGedola', 'minchaKetana', 'plagHaMincha', 'tzeit85deg'];
+const ZMANIM_HIGHLIGHT = ['sunrise', 'sunset'];
+
+function formatZmanTime(isoStr) {
+    if (!isoStr) return '--:--';
+    const d = new Date(isoStr);
+    return d.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+async function loadZmanim() {
+    const dateEl = document.getElementById('zmanim-date');
+    const now = new Date();
+    const days = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Shabbat'];
+    const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    dateEl.textContent = `${days[now.getDay()]} ${now.getDate()} ${months[now.getMonth()]}`;
+
+    // Default: Buenos Aires
+    let lat = -34.6037;
+    let lng = -58.3816;
+    let cityName = 'Buenos Aires, Argentina';
+
+    // Try geolocation
+    try {
+        const pos = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+        });
+        lat = pos.coords.latitude;
+        lng = pos.coords.longitude;
+        // Reverse geocode
+        try {
+            const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es`);
+            const geoData = await geoRes.json();
+            cityName = geoData.address?.city || geoData.address?.town || geoData.address?.state || 'Tu ubicación';
+        } catch(e) {
+            cityName = 'Tu ubicación';
+        }
+    } catch(e) {
+        // Use default Buenos Aires
+    }
+
+    document.getElementById('zmanim-city').textContent = cityName;
+
+    // Fetch zmanim from Hebcal
+    const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    try {
+        const res = await fetch(`https://www.hebcal.com/zmanim?cfg=json&latitude=${lat}&longitude=${lng}&date=${dateStr}`);
+        const data = await res.json();
+        const times = data.times || {};
+
+        renderZmanim(times);
+    } catch(e) {
+        document.getElementById('zmanim-grid').innerHTML = '<div class="zmanim-loading">No se pudieron cargar los horarios</div>';
+    }
+}
+
+function renderZmanim(times) {
+    const grid = document.getElementById('zmanim-grid');
+    let html = '';
+
+    ZMANIM_MAIN.forEach(key => {
+        const isHL = ZMANIM_HIGHLIGHT.includes(key);
+        html += `<div class="zmanim-item${isHL ? ' highlight' : ''}">
+            <span class="zmanim-label">${ZMANIM_LABELS[key] || key}</span>
+            <span class="zmanim-time">${formatZmanTime(times[key])}</span>
+        </div>`;
+    });
+
+    html += '<div class="zmanim-extra" id="zmanim-extra">';
+    ZMANIM_EXTRA.forEach(key => {
+        html += `<div class="zmanim-item">
+            <span class="zmanim-label">${ZMANIM_LABELS[key] || key}</span>
+            <span class="zmanim-time">${formatZmanTime(times[key])}</span>
+        </div>`;
+    });
+    html += '</div>';
+
+    grid.innerHTML = html;
+}
+
+function toggleZmanim() {
+    zmanimExpanded = !zmanimExpanded;
+    const extra = document.getElementById('zmanim-extra');
+    const btn = document.getElementById('zmanim-toggle');
+    if (extra) {
+        extra.classList.toggle('show', zmanimExpanded);
+    }
+    btn.textContent = zmanimExpanded ? 'Ver menos' : 'Ver todos los horarios';
+}
+
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', async () => {
     await checkBackend();
@@ -288,4 +396,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadStudies();
     loadChronicles();
     loadProfile();
+    loadZmanim();
 });
