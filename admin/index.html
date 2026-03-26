@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Raíces y Herencia</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --navy: #1B2A4A;
+            --terracotta: #C44536;
+            --cream: #F5F0E8;
+            --white: #FFFFFF;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --radius: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-100);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        /* Layout */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: var(--navy);
+            color: var(--white);
+            padding: 24px 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar-logo {
+            padding: 0 20px 24px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 16px;
+        }
+
+        .sidebar-logo small {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 400;
+            color: var(--gray-400);
+            margin-top: 2px;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            padding: 10px 24px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-nav li:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .sidebar-nav li.active {
+            background: var(--terracotta);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--terracotta); color: var(--white); }
+        .btn-primary:hover { background: #A33627; }
+        .btn-secondary { background: var(--navy); color: var(--white); }
+        .btn-secondary:hover { background: #0F1B2E; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--gray-300); color: var(--gray-700); }
+        .btn-outline:hover { background: var(--gray-100); }
+        .btn-danger { background: #EF4444; color: var(--white); }
+        .btn-danger:hover { background: #DC2626; }
+        .btn-sm { padding: 5px 12px; font-size: 0.78rem; }
+
+        /* Table */
+        .data-table {
+            width: 100%;
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--gray-100);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .data-table td {
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--gray-100);
+            vertical-align: middle;
+        }
+
+        .data-table tr:hover td {
+            background: var(--cream);
+        }
+
+        .data-table .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .thumb {
+            width: 48px;
+            height: 48px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: var(--gray-200);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: var(--cream);
+            color: var(--navy);
+        }
+
+        /* Forms / Modal */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-backdrop.active { display: flex; }
+
+        .modal-box {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 28px;
+            width: 90%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        .modal-box h3 {
+            font-size: 1.1rem;
+            color: var(--navy);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            font-family: inherit;
+            color: var(--gray-800);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--navy);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        /* Stats cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card .label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--navy);
+        }
+
+        /* Panel content */
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* Truncate */
+        .truncate {
+            max-width: 280px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main-content { padding: 16px; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                Raíces y Herencia
+                <small>Panel de Administración</small>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="active" data-panel="posts">&#128172; Publicaciones</li>
+                <li data-panel="cohorts">&#128218; Cohortes</li>
+                <li data-panel="chronicles">&#128220; Crónicas</li>
+                <li data-panel="studies">&#128214; Estudios</li>
+                <li data-panel="profile">&#128100; Perfil</li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <!-- ===== Posts Panel ===== -->
+            <div class="panel active" id="panel-posts">
+                <div class="page-header">
+                    <h1 class="page-title">Publicaciones del Foro</h1>
+                    <button class="btn btn-primary" onclick="openPostForm()">+ Nueva Publicación</button>
+                </div>
+                <div id="stats-posts" class="stats-grid"></div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr><th>Autor</th><th>Título</th><th>Categoría</th><th>Imagen</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody id="table-posts"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== Cohorts Panel ===== -->
+            <div class="panel" id="panel-cohorts">
+                <div class="page-header">
+                    <h1 class="page-title">Cohortes de Estudio</h1>
+                    <button class="btn btn-primary" onclick="openCohortForm()">+ Nueva Cohorte</button>
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr><th>Título</th><th>Categoría</th><th>Fechas</th><th>Inscritos</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody id="table-cohorts"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== Chronicles Panel ===== -->
+            <div class="panel" id="panel-chronicles">
+                <div class="page-header">
+                    <h1 class="page-title">Crónicas de Herencia</h1>
+                    <button class="btn btn-primary" onclick="openChronicleForm()">+ Nueva Crónica</button>
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr><th>Título</th><th>Categoría</th><th>Fecha</th><th>Destacada</th><th>Imagen</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody id="table-chronicles"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== Studies Panel ===== -->
+            <div class="panel" id="panel-studies">
+                <div class="page-header">
+                    <h1 class="page-title">Estudios Activos</h1>
+                    <button class="btn btn-primary" onclick="openStudyForm()">+ Nuevo Estudio</button>
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                            <tr><th>Título</th><th>Progreso</th><th>Próxima Sesión</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody id="table-studies"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== Profile Panel ===== -->
+            <div class="panel" id="panel-profile">
+                <div class="page-header">
+                    <h1 class="page-title">Perfil de Usuario</h1>
+                </div>
+                <div style="background:var(--white);padding:24px;border-radius:8px;max-width:500px;">
+                    <form id="form-profile" onsubmit="saveProfile(event)">
+                        <div class="form-group">
+                            <label>Nombre</label>
+                            <input type="text" id="prof-name">
+                        </div>
+                        <div class="form-group">
+                            <label>Ubicación</label>
+                            <input type="text" id="prof-location">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Discusiones</label>
+                                <input type="number" id="prof-discussions">
+                            </div>
+                            <div class="form-group">
+                                <label>Cohortes</label>
+                                <input type="number" id="prof-cohorts">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Historias</label>
+                            <input type="number" id="prof-historias">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Guardar Perfil</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ===== Modal Forms ===== -->
+    <div class="modal-backdrop" id="modal-form">
+        <div class="modal-box">
+            <h3 id="modal-form-title">Nuevo</h3>
+            <div id="modal-form-body"></div>
+        </div>
+    </div>
+
+    <script>
+    const API = '';
+
+    // === Navigation ===
+    document.querySelectorAll('.sidebar-nav li').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.sidebar-nav li').forEach(i => i.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            item.classList.add('active');
+            document.getElementById('panel-' + item.dataset.panel).classList.add('active');
+        });
+    });
+
+    // === Generic helpers ===
+    function esc(str) {
+        if (!str) return '';
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
+    function openModal(title, html) {
+        document.getElementById('modal-form-title').textContent = title;
+        document.getElementById('modal-form-body').innerHTML = html;
+        document.getElementById('modal-form').classList.add('active');
+    }
+
+    function closeModalForm() {
+        document.getElementById('modal-form').classList.remove('active');
+    }
+
+    document.getElementById('modal-form').addEventListener('click', function(e) {
+        if (e.target === this) closeModalForm();
+    });
+
+    // ==============================
+    // POSTS
+    // ==============================
+    async function loadPosts() {
+        const posts = await (await fetch(API + '/api/posts')).json();
+        document.getElementById('stats-posts').innerHTML = `
+            <div class="stat-card"><div class="label">Total Publicaciones</div><div class="value">${posts.length}</div></div>
+        `;
+        document.getElementById('table-posts').innerHTML = posts.map(p => `
+            <tr>
+                <td>${esc(p.author)}</td>
+                <td class="truncate">${esc(p.title)}</td>
+                <td>${p.category ? `<span class="badge">${esc(p.category)}</span>` : '-'}</td>
+                <td>${p.image ? `<img src="${p.image}" class="thumb">` : '-'}</td>
+                <td class="actions">
+                    <button class="btn btn-outline btn-sm" onclick="editPost('${p.id}')">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deletePost('${p.id}')">Eliminar</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openPostForm(post = null) {
+        const title = post ? 'Editar Publicación' : 'Nueva Publicación';
+        openModal(title, `
+            <form onsubmit="submitPost(event, '${post ? post.id : ''}')" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Autor</label>
+                    <input type="text" name="author" value="${post ? esc(post.author) : ''}" required>
+                </div>
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" name="title" value="${post ? esc(post.title) : ''}" required>
+                </div>
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select name="category">
+                        <option value="">Sin categoría</option>
+                        <option value="Gastronomía" ${post && post.category === 'Gastronomía' ? 'selected' : ''}>Gastronomía</option>
+                        <option value="Genealogía" ${post && post.category === 'Genealogía' ? 'selected' : ''}>Genealogía</option>
+                        <option value="Cultura" ${post && post.category === 'Cultura' ? 'selected' : ''}>Cultura</option>
+                        <option value="Historia" ${post && post.category === 'Historia' ? 'selected' : ''}>Historia</option>
+                        <option value="Música" ${post && post.category === 'Música' ? 'selected' : ''}>Música</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Contenido</label>
+                    <textarea name="content" rows="4" required>${post ? esc(post.content) : ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Imagen</label>
+                    <input type="file" name="image" accept="image/*">
+                    ${post && post.image ? `<img src="${post.image}" class="thumb" style="margin-top:8px;">` : ''}
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModalForm()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        `);
+    }
+
+    async function editPost(id) {
+        const posts = await (await fetch(API + '/api/posts')).json();
+        const post = posts.find(p => p.id === id);
+        if (post) openPostForm(post);
+    }
+
+    async function submitPost(e, editId) {
+        e.preventDefault();
+        const form = e.target;
+        const data = new FormData(form);
+        const url = editId ? `/api/posts/${editId}` : '/api/posts';
+        const method = editId ? 'PUT' : 'POST';
+        await fetch(API + url, { method, body: data });
+        closeModalForm();
+        loadPosts();
+    }
+
+    async function deletePost(id) {
+        if (!confirm('¿Eliminar esta publicación?')) return;
+        await fetch(API + '/api/posts/' + id, { method: 'DELETE' });
+        loadPosts();
+    }
+
+    // ==============================
+    // COHORTS
+    // ==============================
+    async function loadCohorts() {
+        const cohorts = await (await fetch(API + '/api/cohorts')).json();
+        document.getElementById('table-cohorts').innerHTML = cohorts.map(c => `
+            <tr>
+                <td>${esc(c.title)}</td>
+                <td><span class="badge" style="background:${c.categoryColor};color:#fff;">${esc(c.category)}</span></td>
+                <td>${esc(c.dates)}</td>
+                <td>${c.joined}/${c.total}</td>
+                <td class="actions">
+                    <button class="btn btn-outline btn-sm" onclick="editCohort('${c.id}')">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteCohort('${c.id}')">Eliminar</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openCohortForm(cohort = null) {
+        openModal(cohort ? 'Editar Cohorte' : 'Nueva Cohorte', `
+            <form onsubmit="submitCohort(event, '${cohort ? cohort.id : ''}')">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" name="title" value="${cohort ? esc(cohort.title) : ''}" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <input type="text" name="category" value="${cohort ? esc(cohort.category) : ''}" placeholder="LINGÜÍSTICA">
+                    </div>
+                    <div class="form-group">
+                        <label>Color</label>
+                        <input type="color" name="categoryColor" value="${cohort ? cohort.categoryColor : '#C44536'}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Fechas</label>
+                    <input type="text" name="dates" value="${cohort ? esc(cohort.dates) : ''}" placeholder="01 Sep — 14 Nov">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Inscritos</label>
+                        <input type="number" name="joined" value="${cohort ? cohort.joined : 0}" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Cupo Total</label>
+                        <input type="number" name="total" value="${cohort ? cohort.total : 10}" min="1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Imagen</label>
+                    <input type="file" name="image" accept="image/*">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModalForm()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        `);
+    }
+
+    async function editCohort(id) {
+        const cohorts = await (await fetch(API + '/api/cohorts')).json();
+        const c = cohorts.find(x => x.id === id);
+        if (c) openCohortForm(c);
+    }
+
+    async function submitCohort(e, editId) {
+        e.preventDefault();
+        const form = e.target;
+        const data = new FormData(form);
+        const url = editId ? `/api/cohorts/${editId}` : '/api/cohorts';
+        await fetch(API + url, { method: editId ? 'PUT' : 'POST', body: data });
+        closeModalForm();
+        loadCohorts();
+    }
+
+    async function deleteCohort(id) {
+        if (!confirm('¿Eliminar esta cohorte?')) return;
+        await fetch(API + '/api/cohorts/' + id, { method: 'DELETE' });
+        loadCohorts();
+    }
+
+    // ==============================
+    // CHRONICLES
+    // ==============================
+    async function loadChronicles() {
+        const chronicles = await (await fetch(API + '/api/chronicles')).json();
+        document.getElementById('table-chronicles').innerHTML = chronicles.map(c => `
+            <tr>
+                <td class="truncate">${esc(c.title)}</td>
+                <td><span class="badge">${esc(c.category)}</span></td>
+                <td>${esc(c.date)}</td>
+                <td>${c.featured ? '&#11088;' : '-'}</td>
+                <td>${c.image ? `<img src="${c.image}" class="thumb">` : '-'}</td>
+                <td class="actions">
+                    <button class="btn btn-outline btn-sm" onclick="editChronicle('${c.id}')">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteChronicle('${c.id}')">Eliminar</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openChronicleForm(ch = null) {
+        openModal(ch ? 'Editar Crónica' : 'Nueva Crónica', `
+            <form onsubmit="submitChronicle(event, '${ch ? ch.id : ''}')">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" name="title" value="${ch ? esc(ch.title) : ''}" required>
+                </div>
+                <div class="form-group">
+                    <label>Subtítulo / Descripción</label>
+                    <textarea name="subtitle" rows="3">${ch ? esc(ch.subtitle) : ''}</textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <input type="text" name="category" value="${ch ? esc(ch.category) : ''}" placeholder="FEATURED STORY">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="text" name="date" value="${ch ? esc(ch.date) : ''}" placeholder="MARCH 2024">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tiempo de lectura</label>
+                    <input type="text" name="readTime" value="${ch ? esc(ch.readTime) : ''}" placeholder="10 min read">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="featured" ${ch && ch.featured ? 'checked' : ''}> Historia Destacada
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Imagen</label>
+                    <input type="file" name="image" accept="image/*">
+                    ${ch && ch.image ? `<img src="${ch.image}" class="thumb" style="margin-top:8px;">` : ''}
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModalForm()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        `);
+    }
+
+    async function editChronicle(id) {
+        const chronicles = await (await fetch(API + '/api/chronicles')).json();
+        const c = chronicles.find(x => x.id === id);
+        if (c) openChronicleForm(c);
+    }
+
+    async function submitChronicle(e, editId) {
+        e.preventDefault();
+        const form = e.target;
+        const data = new FormData(form);
+        // Handle checkbox
+        const featuredCb = form.querySelector('input[name="featured"]');
+        data.set('featured', featuredCb.checked ? 'true' : 'false');
+        const url = editId ? `/api/chronicles/${editId}` : '/api/chronicles';
+        await fetch(API + url, { method: editId ? 'PUT' : 'POST', body: data });
+        closeModalForm();
+        loadChronicles();
+    }
+
+    async function deleteChronicle(id) {
+        if (!confirm('¿Eliminar esta crónica?')) return;
+        await fetch(API + '/api/chronicles/' + id, { method: 'DELETE' });
+        loadChronicles();
+    }
+
+    // ==============================
+    // STUDIES
+    // ==============================
+    async function loadStudies() {
+        const studies = await (await fetch(API + '/api/studies')).json();
+        document.getElementById('table-studies').innerHTML = studies.map(s => `
+            <tr>
+                <td>${esc(s.title)}</td>
+                <td>${s.progress}%</td>
+                <td>${esc(s.nextSession)}</td>
+                <td class="actions">
+                    <button class="btn btn-outline btn-sm" onclick="editStudy('${s.id}')">Editar</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteStudy('${s.id}')">Eliminar</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openStudyForm(study = null) {
+        openModal(study ? 'Editar Estudio' : 'Nuevo Estudio', `
+            <form onsubmit="submitStudy(event, '${study ? study.id : ''}')">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" name="title" value="${study ? esc(study.title) : ''}" required>
+                </div>
+                <div class="form-group">
+                    <label>Progreso (%)</label>
+                    <input type="number" name="progress" value="${study ? study.progress : 0}" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label>Próxima Sesión</label>
+                    <input type="text" name="nextSession" value="${study ? esc(study.nextSession) : ''}" placeholder="Próxima sesión: Jueves, 10:30">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModalForm()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        `);
+    }
+
+    async function editStudy(id) {
+        const studies = await (await fetch(API + '/api/studies')).json();
+        const s = studies.find(x => x.id === id);
+        if (s) openStudyForm(s);
+    }
+
+    async function submitStudy(e, editId) {
+        e.preventDefault();
+        const form = e.target;
+        const body = {
+            title: form.title.value,
+            progress: parseInt(form.progress.value) || 0,
+            nextSession: form.nextSession.value
+        };
+        const url = editId ? `/api/studies/${editId}` : '/api/studies';
+        await fetch(API + url, {
+            method: editId ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        closeModalForm();
+        loadStudies();
+    }
+
+    async function deleteStudy(id) {
+        if (!confirm('¿Eliminar este estudio?')) return;
+        await fetch(API + '/api/studies/' + id, { method: 'DELETE' });
+        loadStudies();
+    }
+
+    // ==============================
+    // PROFILE
+    // ==============================
+    async function loadProfile() {
+        const profile = await (await fetch(API + '/api/profile')).json();
+        document.getElementById('prof-name').value = profile.name || '';
+        document.getElementById('prof-location').value = profile.location || '';
+        document.getElementById('prof-discussions').value = profile.discussions || 0;
+        document.getElementById('prof-cohorts').value = profile.cohorts || 0;
+        document.getElementById('prof-historias').value = profile.historias || 0;
+    }
+
+    async function saveProfile(e) {
+        e.preventDefault();
+        const body = {
+            name: document.getElementById('prof-name').value,
+            location: document.getElementById('prof-location').value,
+            discussions: parseInt(document.getElementById('prof-discussions').value) || 0,
+            cohorts: parseInt(document.getElementById('prof-cohorts').value) || 0,
+            historias: parseInt(document.getElementById('prof-historias').value) || 0
+        };
+        await fetch(API + '/api/profile', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        alert('Perfil guardado correctamente');
+    }
+
+    // ===== Init =====
+    loadPosts();
+    loadCohorts();
+    loadChronicles();
+    loadStudies();
+    loadProfile();
+    </script>
+</body>
+</html>
