@@ -443,6 +443,11 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
   res.json({ url: '/uploads/' + req.file.filename });
 });
 
+// Serve 3D digestive system page
+app.get('/digestive-system', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'digestive-system-3d.html'));
+});
+
 // Serve main app
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
